@@ -148,12 +148,12 @@
 #define X14 64
 #define X15 0
 
-__kernel void otpmd5(__global const unsigned int* input, __global unsigned int* output, int rounds)
+__kernel void otpmd5(__global unsigned int* data, int rounds)
 {
 	const unsigned int offset = get_global_id(0) * 2;
 
-	unsigned int X0 = input[offset];
-	unsigned int X1 = input[offset+1];
+	unsigned int X0 = data[offset];
+	unsigned int X1 = data[offset+1];
 
 	while(rounds-- > 0)
 	{
@@ -243,7 +243,7 @@ __kernel void otpmd5(__global const unsigned int* input, __global unsigned int* 
 		X1 = b ^ d;
 	}
 
-	output[offset] = X0;
-	output[offset+1] = X1;
+	data[offset] = X0;
+	data[offset+1] = X1;
 }
 

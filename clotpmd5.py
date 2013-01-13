@@ -22,17 +22,14 @@ def calc_range(start, num, rounds):
 
 	# Create a numpy array of input values, and copy to device
 	host_input = numpy.arange(start, start+num, dtype=numpy.uint64)
-	dev_input = cl.Buffer(ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=host_input)
+	dev_data = cl.Buffer(ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=host_input)
 	
-	# Create a buffer to write the output to
-	dev_output = cl.Buffer(ctx, mf.WRITE_ONLY, host_input.nbytes)
-
 	# Execute the kernel, and wait for it to finish
-	prg.otpmd5(queue, host_input.shape, None, dev_input, dev_output, numpy.uint32(rounds)).wait()
+	prg.otpmd5(queue, host_input.shape, None, dev_data, numpy.uint32(rounds)).wait()
 
 	# Copy the results from the device
 	result = numpy.empty_like(host_input)
-	cl.enqueue_copy(queue, result, dev_output).wait()
+	cl.enqueue_copy(queue, result, dev_data).wait()
 
 	# Zip the input with output
 	return zip(host_input.byteswap(), result.byteswap())
