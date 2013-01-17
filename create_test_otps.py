@@ -6,7 +6,6 @@ import hashlib
 import struct
 import pyopencl as cl
 import numpy
-import binascii
 
 def otp_md5(string, n=0):
 	"""Perform basic otp_md5 of string, creating sequence n"""
@@ -49,8 +48,8 @@ class random_otp():
 	def save(self):
 		filename = "otpmd5_{0:s}_{1:d}_{2:s}_candidates".format(self.seed, self.sequence, self.password)
 		with open(filename, "w") as fd:
-			for b in self.breaks:
-				fd.write(numpy_to_hexstr(b) + "\n")
+			for rounds, source in self.breaks:
+				fd.write(str(rounds) + "\t" + numpy_to_hexstr(source) + "\n")
 
 def numpy_to_hexstr(n):
 	return "{0:016x}".format(n.byteswap())
@@ -61,7 +60,7 @@ def find_breaks(table, base_round, otp, results):
 		roundnum = base_round + i
 		for source, _result in table.get(result):
 			assert(_result == result)
-			otp.breaks.append((roundnum, result))
+			otp.breaks.append((roundnum, source))
 			#print("Found conflict: {0:s}, roundnum={1:d}, source={2:s}, break={3:s}".format(repr(otp), roundnum, numpy_to_hexstr(source), numpy_to_hexstr(result)))
 
 def process_otps(otplist, rounds, batch):
@@ -153,5 +152,9 @@ if __name__ == "__main__":
 	for (base_round, otp_and_results) in process_otps(otplist, args.rounds, args.batch):
 		for (otp, results) in otp_and_results:
 			find_breaks(table, base_round, otp, results)
+			# validate_results(otp, base_round, results)
 		#print("Completed rounds {0:d} - {1:d}".format(base_round, base_round + args.batch))
+
+	for o in otplist:
+		o.save()
 
