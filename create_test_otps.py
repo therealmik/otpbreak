@@ -58,10 +58,9 @@ def find_breaks(table, base_round, otp, results):
 	for i in range(len(results)):
 		result = results[i]
 		roundnum = base_round + i
-		for source, _result in table.get(result):
-			assert(_result == result)
+		for source in table.get(result):
 			otp.breaks.append((roundnum, source))
-			#print("Found conflict: {0:s}, roundnum={1:d}, source={2:s}, break={3:s}".format(repr(otp), roundnum, numpy_to_hexstr(source), numpy_to_hexstr(result)))
+			print("Found conflict: {0:s}, roundnum={1:d}, source={2:s}, break={3:s}".format(repr(otp), roundnum, numpy_to_hexstr(source), numpy_to_hexstr(result)))
 
 def process_otps(otplist, rounds, batch):
 	"""Process the list of otps, hashing themselves for @rounds, yielding every @batch rounds"""
@@ -114,7 +113,7 @@ class otptable(object):
 		if self.table[index] is None:
 			return []
 		else:
-			return filter(lambda x: x[1] == key, self.table[index])
+			return [ x[0] for x in self.table[index] if x[1] == key ]
 
 	@classmethod
 	def parse_blocks(cls, filename):
