@@ -263,7 +263,7 @@ __kernel void get_otpmd5_64k_rounds(__global uint* data)
 	uint X0 = data[OFFSET];
 	uint X1 = data[OFFSET+1];
 
-	#pragma unroll
+	#pragma unroll(65536)
 	for(uint i = 0; i < 65536; i++)
 		otpmd5_round(X0, X1);
 
