@@ -30,7 +30,7 @@ def calc_range(start, num, rounds, per_exec_rounds=None):
 	
 	# Execute the kernel, and wait for it to finish
 	for i in xrange(rounds / per_exec_rounds):
-		prg.otpmd5(queue, host_input.shape, None, dev_data, numpy.uint32(per_exec_rounds)).wait()
+		prg.get_otpmd5_result(queue, host_input.shape, None, dev_data, numpy.uint32(per_exec_rounds)).wait()
 
 	# Copy the results from the device
 	result = numpy.empty_like(host_input)
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Calculate chains of OTP-MD5 values")
 	parser.add_argument("--start", help="First input OTP value", type=long, default=0L)
 	parser.add_argument("--num", help="Number of OTP chains to calculate", type=long, default=1024L)
-	parser.add_argument("--rounds", help="Number of rounds in each chain", type=long, default=2**28L)
+	parser.add_argument("--rounds", help="Number of rounds in each chain", type=long, default=2**16L)
 	parser.add_argument("--perexec", help="Number of rounds per-execution", type=long)
 
 	args = parser.parse_args()
