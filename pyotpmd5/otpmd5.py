@@ -16,7 +16,7 @@ def tobytes(otp):
 
 def hashbytes(s):
 	digest = hashlib.md5(s).digest()
-	a = numpy.fromstring(digest, dtype=numpy.int64)
+	a = numpy.fromstring(digest, dtype=numpy.uint64)
 	if sys.byteorder != 'little':
 		a = a.byteswap()
 	return numpy.bitwise_xor(*a)
