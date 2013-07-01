@@ -245,8 +245,8 @@ uint64_t _otpmd5(uint64_t* input, int rounds)
 /* NOTE: Includes round 0 (eg. no hashing) */
 void _otpmd5_chain(uint64_t* result, uint64_t* input, int rounds)
 {
-	uint32_t X0 = ((uint32_t *)&input)[0];
-	uint32_t X1 = ((uint32_t *)&input)[1];
+	uint32_t X0 = ((uint32_t *)input)[0];
+	uint32_t X1 = ((uint32_t *)input)[1];
 	unsigned int i;
 
 	for( i = 0; i < rounds; i++)
