@@ -229,24 +229,24 @@
 	X1 = b ^ d; \
 }
 
-int64_t _otpmd5(int64_t input, unsigned int rounds)
+uint64_t _otpmd5(uint64_t* input, int rounds)
 {
-	register uint32_t X0 = ((uint32_t *)&input)[0];
-	register uint32_t X1 = ((uint32_t *)&input)[1];
+	uint32_t X0 = ((uint32_t *)input)[0];
+	uint32_t X1 = ((uint32_t *)input)[1];
 
 	while(rounds-- > 0)
 	{
 		otpmd5_round(X0, X1);
 	}
 
-	return (int64_t)((uint64_t)X1) << 32 | ((uint64_t)X0);
+	return (uint64_t)((uint64_t)X1) << 32 | ((uint64_t)X0);
 }
 
 /* NOTE: Includes round 0 (eg. no hashing) */
-void _otpmd5_chain(int64_t* result, int64_t input, unsigned int rounds)
+void _otpmd5_chain(uint64_t* result, uint64_t* input, int rounds)
 {
-	register uint32_t X0 = ((uint32_t *)&input)[0];
-	register uint32_t X1 = ((uint32_t *)&input)[1];
+	uint32_t X0 = ((uint32_t *)&input)[0];
+	uint32_t X1 = ((uint32_t *)&input)[1];
 	unsigned int i;
 
 	for( i = 0; i < rounds; i++)

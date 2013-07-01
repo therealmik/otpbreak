@@ -2,21 +2,22 @@ import numpy
 cimport numpy
 
 cdef extern from "otpmd5.h":
-	ctypedef numpy.int64_t int64_t
-	int64_t _otpmd5(int64_t data, int rounds) nogil
-	void _otpmd5_chain(int64_t* result, int64_t data, int rounds) nogil
+	ctypedef numpy.uint64_t uint64_t
+	uint64_t _otpmd5(uint64_t* data, int rounds) nogil
+	void _otpmd5_chain(uint64_t* result, uint64_t* data, int rounds) nogil
 
-def otpmd5(int64_t data, int rounds):
-	cdef int64_t result
-
-	with nogil:
-		result = _otpmd5(data, rounds)
-	return numpy.int64(result)
-
-def otpmd5_chain(int64_t data, int rounds):
-	cdef numpy.ndarray result = numpy.empty(rounds, dtype=numpy.int64)
+def otpmd5(uint64_t start, int rounds):
+	cdef uint64_t result
 
 	with nogil:
-		_otpmd5_chain(<int64_t*>result.data, data, rounds)
+		result = _otpmd5(&start, rounds)
+	return numpy.uint64(result)
+
+def otpmd5_chain(uint64_t start, int rounds):
+	cdef numpy.ndarray result = numpy.empty(rounds, dtype=numpy.uint64)
+
+	with nogil:
+		_otpmd5_chain(<uint64_t*>result.data, &start, rounds)
 	return result
+
 

@@ -4,28 +4,24 @@ import numpy
 import hashlib
 import sys
 from cotpmd5 import otpmd5 as digest
+import binascii
 
 def tohex(otp):
-	return "{0:016x}".format(otp.byteswap())
+	return binascii.b2a_hex(tobytes(otp))
 
-def tobytes_portable(otp):
-	return bytes.fromhex(tohex(otp))
-	
-if sys.byteorder == 'little':
-	tobytes = numpy.uint64.tostring
-else:
-	tobytes = tobytes_portable
+def tobytes(otp):
+	if sys.byteorder != 'little':
+		otp = otp.byteswap()
+	return otp.tostring()
 
 def hashbytes(s):
 	digest = hashlib.md5(s).digest()
-	return numpy.bitwise_xor(*numpy.fromstring(digest, dtype=numpy.uint64))
+	a = numpy.fromstring(digest, dtype=numpy.int64)
+	if sys.byteorder != 'little':
+		a = a.byteswap()
+	return numpy.bitwise_xor(*a)
 
 def create(seed, passphrase, sequence):
 	s = (seed + passphrase).encode("UTF-8")
 	return digest(hashbytes(s), sequence)
-
-#def digest(otp, sequence=1):
-#	for _ in range(sequence):
-#		otp = hashbytes(tobytes(otp))
-#	return otp
 
