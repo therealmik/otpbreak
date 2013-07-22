@@ -38,15 +38,23 @@ def find_breaks(db, rounds, otp):
 	print("Finding breaks for " + repr(otp))
 
 	for (roundnum, value) in enumerate(cotpmd5.otpmd5_chain(otp.otp, rounds)):
-		for row in db.execute("SELECT source FROM otpmd5 WHERE result = ?", [numpy.int64(value)]):
+		cur = db.cursor()
+		cur.execute("SELECT source FROM otpmd5 WHERE result = %s", [int(numpy.int64(value))])
+		for row in cur:
 			source = numpy.uint64(row[0])
 			otp.breaks.append((roundnum, source))
 			print("Found candidate: {0:s}, roundnum={1:d}, source={2:s}, break={3:s}".format(repr(otp), roundnum, otpmd5.tohex(source), otpmd5.tohex(value)))
+			sec_cur = db.cursor()
+			sec_cur.execute("SELECT source FROM otpmd5_conflicts WHERE result = %s", [int(numpy.int64(value))])
+			for row in sec_cur:
+				source = numpy.uint64(row[0])
+				otp.breaks.append((roundnum, source))
+				print("Found candidate: {0:s}, roundnum={1:d}, source={2:s}, break={3:s}".format(repr(otp), roundnum, otpmd5.tohex(source), otpmd5.tohex(value)))
 
 def validate_breaks(otp, rounds):
 	for (roundnum, source) in otp.breaks:
 		result = cotpmd5.otpmd5_chain(source, rounds)
-		print("{0:s} + {1:-6d} = {2:s} : {3:s}".format(otpmd5.tohex(source), roundnum, otpmd5.tohex(result[roundnum]), otpmd5.tohex(otp.otp)))
+		print("{0:s} + {1:-6d} = {2:s} : {3:s}".format(otpmd5.tohex(source), 65535-roundnum, otpmd5.tohex(result[65535-roundnum]), otpmd5.tohex(otp.otp)))
 		if otp.otp in result:
 			print("Break found for {0:s}: {1:s}".format(repr(otp), otpmd5.tohex(source)))
 			return True
@@ -59,7 +67,9 @@ if __name__ == "__main__":
 	parser.add_argument("--database", help="Database containing OTP blocks", required=True)
 	args = parser.parse_args()
 
-	db = sqlite3.connect(args.database, isolation_level=None)
+	#db = sqlite3.connect(args.database, isolation_level=None)
+	import psycopg2
+	db = psycopg2.connect(args.database)
 
 	while True:
 		otp = random_otp()
